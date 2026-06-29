@@ -6,8 +6,8 @@
     <style>
         body { 
             font-family: 'Segoe UI', sans-serif; 
-            /* Menggunakan URL RAW agar gambar muncul di GitHub Pages */
-            background-image: url('https://raw.githubusercontent.com/AlvaroJambi/Cari-Pasangan-Gambar-Tema-Buah/main/Gemini_Generated_Image_u2iegfu2iegfu2ie_2.png');
+            /* Menggunakan Background.png sesuai permintaan */
+            background-image: url('https://raw.githubusercontent.com/AlvaroJambi/Cari-Pasangan-Gambar-Tema-Buah/main/Background.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -47,16 +47,15 @@
         .card { width: 70px; height: 70px; background: #ff9f43; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; color: white; border: 2px solid #fff; }
         .card.flipped { background: white; color: #333; }
         
-        .confetti { position: fixed; top: -50px; font-size: 20px; animation: fall 2s linear; pointer-events: none; }
-        @keyframes fall { to { transform: translateY(100vh); } }
-
+        /* Confetti bertaburan */
+        .confetti { position: fixed; font-size: 30px; z-index: 200; pointer-events: none; }
+        
         .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
         button { padding: 15px 30px; font-size: 18px; border-radius: 30px; border: none; background: #ff4757; color: white; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- Link Raw untuk audio agar terdeteksi GitHub -->
     <audio id="music" src="https://raw.githubusercontent.com/AlvaroJambi/Cari-Pasangan-Gambar-Tema-Buah/main/Musik.mp3" loop></audio>
     <audio id="soundSalah" src="https://raw.githubusercontent.com/AlvaroJambi/Cari-Pasangan-Gambar-Tema-Buah/main/Sound%20Salah.mpeg"></audio>
 
@@ -79,27 +78,40 @@
         const music = document.getElementById('music');
         const sSalah = document.getElementById('soundSalah');
         const grid = document.getElementById('gameGrid');
-        
-        // Aktifkan musik saat klik pertama di halaman
+        let timerInterval, seconds = 0;
+
         document.addEventListener('click', () => { music.play(); }, {once: true});
 
         function triggerConfetti() {
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 30; i++) {
                 const c = document.createElement('div');
-                c.className = 'confetti'; c.innerText = '✨';
+                c.className = 'confetti'; c.innerText = '🎊';
                 c.style.left = Math.random() * 100 + 'vw';
+                c.style.top = '-50px';
                 document.body.appendChild(c);
-                setTimeout(() => c.remove(), 2000);
+                
+                let animation = c.animate([
+                    { transform: `translate(0, 0) rotate(0deg)` },
+                    { transform: `translate(${Math.random()*200 - 100}px, 100vh) rotate(360deg)` }
+                ], { duration: 2000 + Math.random()*1000, easing: 'linear' });
+                
+                animation.onfinish = () => c.remove();
             }
         }
 
         function startGame() {
             grid.innerHTML = '';
+            seconds = 0; clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                seconds++;
+                let m = Math.floor(seconds / 60);
+                let s = seconds % 60;
+                document.getElementById('timer').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+            }, 1000);
+
             let fruits = ['🍎', '🍎', '🍌', '🍌', '🍇', '🍇', '🍓', '🍓', '🍍', '🍍', '🍒', '🍒', '🥝', '🥝', '🍉', '🍉'].sort(() => Math.random() - 0.5);
             let flipped = [], matches = 0, moves = 0;
             document.getElementById('popup').style.display = 'none';
-            document.getElementById('matches').innerText = "0/8";
-            document.getElementById('moves').innerText = "0";
 
             fruits.forEach(f => {
                 const card = document.createElement('div');
@@ -112,7 +124,7 @@
                             if (flipped[0].innerHTML === flipped[1].innerHTML) {
                                 matches++; document.getElementById('matches').innerText = matches + "/8";
                                 triggerConfetti(); flipped = [];
-                                if (matches === 8) document.getElementById('popup').style.display = 'flex';
+                                if (matches === 8) { clearInterval(timerInterval); document.getElementById('popup').style.display = 'flex'; }
                             } else {
                                 sSalah.play();
                                 setTimeout(() => { flipped.forEach(c => { c.classList.remove('flipped'); c.innerHTML = '?'; }); flipped = []; }, 800);
