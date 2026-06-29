@@ -6,8 +6,8 @@
     <style>
         body { 
             font-family: 'Segoe UI', sans-serif; 
-            /* Menggunakan Background.png sesuai permintaan */
-            background-image: url('https://raw.githubusercontent.com/AlvaroJambi/Cari-Pasangan-Gambar-Tema-Buah/main/Background.png');
+            /* Menggunakan jalur relatif (titik/garis miring) */
+            background-image: url('./Background.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -47,7 +47,6 @@
         .card { width: 70px; height: 70px; background: #ff9f43; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; color: white; border: 2px solid #fff; }
         .card.flipped { background: white; color: #333; }
         
-        /* Confetti bertaburan */
         .confetti { position: fixed; font-size: 30px; z-index: 200; pointer-events: none; }
         
         .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
@@ -56,8 +55,8 @@
 </head>
 <body>
 
-    <audio id="music" src="https://raw.githubusercontent.com/AlvaroJambi/Cari-Pasangan-Gambar-Tema-Buah/main/Musik.mp3" loop></audio>
-    <audio id="soundSalah" src="https://raw.githubusercontent.com/AlvaroJambi/Cari-Pasangan-Gambar-Tema-Buah/main/Sound%20Salah.mpeg"></audio>
+    <audio id="music" src="./Musik.mp3" loop></audio>
+    <audio id="soundSalah" src="./Sound Salah.mpeg"></audio>
 
     <div class="main-wrapper">
         <h1>TEBAK GAMBAR BUAH</h1>
@@ -83,7 +82,7 @@
         document.addEventListener('click', () => { music.play(); }, {once: true});
 
         function triggerConfetti() {
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 20; i++) {
                 const c = document.createElement('div');
                 c.className = 'confetti'; c.innerText = '🎊';
                 c.style.left = Math.random() * 100 + 'vw';
