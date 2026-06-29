@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Game Tebak Buah</title>
+    <style>
+        body { text-align: center; font-family: sans-serif; background: #f4f4f4; }
+        .grid { display: grid; grid-template-columns: repeat(4, 100px); gap: 10px; justify-content: center; margin-top: 20px; }
+        .card { width: 100px; height: 100px; background: #3498db; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 40px; border-radius: 8px; }
+        .card.flipped { background: white; cursor: default; }
+        #stats { margin: 20px; font-size: 1.2rem; }
+        .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); color: white; flex-direction: column; align-items: center; justify-content: center; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>Tebak Pasangan Buah</h1>
+    <div id="stats">Langkah: <span id="moves">0</span> | Waktu: <span id="timer">0</span> detik</div>
+    <div class="grid" id="gameGrid"></div>
+
+    <div class="popup" id="popup">
+        <h1>🎊 Hebat 🎊</h1>
+        <p>Kamu Berhasil Mencocokkan Semua Kartu</p>
+        <div id="finalStats"></div>
+        <button onclick="startGame()">Main Lagi</button>
+    </div>
+
+    <script>
+        const grid = document.getElementById('gameGrid');
+        const movesDisplay = document.getElementById('moves');
+        const timerDisplay = document.getElementById('timer');
+        const fruits = ['🍎', '🍎', '🍌', '🍌', '🍇', '🍇', '🍓', '🍓', '🍍', '🍍', '🍒', '🍒', '🥝', '🥝', '🍉', '🍉'];
+        let cards = [];
+        let flippedCards = [];
+        let moves = 0;
+        let matches = 0;
+        let timer = 0;
+        let timerInterval;
+
+        function startGame() {
+            grid.innerHTML = '';
+            cards = [...fruits].sort(() => Math.random() - 0.5);
+            flippedCards = [];
+            moves = 0;
+            matches = 0;
+            timer = 0;
+            movesDisplay.innerText = moves;
+            timerDisplay.innerText = timer;
+            document.getElementById('popup').style.display = 'none';
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => { timer++; timerDisplay.innerText = timer; }, 1000);
+
+            cards.forEach((fruit, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.fruit = fruit;
+                card.dataset.index = index;
+                card.addEventListener('click', flipCard);
+                grid.appendChild(card);
+            });
+        }
+
+        function flipCard() {
+            if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
+                this.classList.add('flipped');
+                this.innerText = this.dataset.fruit;
+                flippedCards.push(this);
+
+                if (flippedCards.length === 2) {
+                    moves++;
+                    movesDisplay.innerText = moves;
+                    checkMatch();
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [c1, c2] = flippedCards;
+            if (c1.dataset.fruit === c2.dataset.fruit) {
+                matches++;
+                flippedCards = [];
+                if (matches === 8) endGame();
+            } else {
+                setTimeout(() => {
+                    c1.classList.remove('flipped');
+                    c2.classList.remove('flipped');
+                    c1.innerText = '';
+                    c2.innerText = '';
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            document.getElementById('popup').style.display = 'flex';
+            document.getElementById('finalStats').innerHTML = `
+                <p>| Langkah: ${moves} | Waktu: ${timer} detik |</p>
+            `;
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
