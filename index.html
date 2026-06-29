@@ -19,17 +19,20 @@
         .stat-box { border: 3px solid #333; border-radius: 20px; padding: 10px 20px; text-align: center; width: 80px; background: white; }
         .grid { display: grid; grid-template-columns: repeat(4, 70px); gap: 10px; background: rgba(255, 255, 255, 0.9); padding: 15px; border-radius: 20px; border: 3px solid #333; }
         .card { width: 70px; height: 70px; background: linear-gradient(135deg, #ff9f43, #ff6b6b); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; color: white; border: 2px solid #fff; }
-        .card.flipped { background: white; color: #333; border: 2px solid #ff9f43; cursor: default; }
+        .card.flipped { background: white; color: #333; border: 2px solid #ff9f43; }
+        
+        /* CSS untuk Confetti sederhana */
+        .confetti { position: fixed; top: -50px; font-size: 20px; animation: fall 2s linear; }
+        @keyframes fall { to { transform: translateY(100vh); } }
+
         .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
         button { padding: 15px 30px; font-size: 18px; border-radius: 30px; border: none; background: #ff4757; color: white; cursor: pointer; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- Audio Elements -->
-    <audio id="soundBenar" src="Sound Benar .mpeg"></audio>
-    <audio id="soundSalah" src="Sound Salah.mpeg"></audio>
     <audio id="music" src="Musik.mp3" loop></audio>
+    <audio id="soundSalah" src="Sound Salah.mpeg"></audio>
 
     <div class="container">
         <h1>TEBAK GAMBAR BUAH</h1>
@@ -43,60 +46,54 @@
 
     <div class="popup" id="popup">
         <h1>🎊 Hebat 🎊</h1>
-        <p>Kamu Berhasil Mencocokkan Semua Kartu</p>
         <button id="btnMainLagi">Main Lagi</button>
     </div>
 
     <script>
         const music = document.getElementById('music');
-        const sBenar = document.getElementById('soundBenar');
         const sSalah = document.getElementById('soundSalah');
-        const btnMainLagi = document.getElementById('btnMainLagi');
-        
         const grid = document.getElementById('gameGrid');
-        const fruits = ['🍎', '🍎', '🍌', '🍌', '🍇', '🍇', '🍓', '🍓', '🍍', '🍍', '🍒', '🍒', '🥝', '🥝', '🍉', '🍉'];
-        let cards = [], flippedCards = [], matches = 0, moves = 0, gameStarted = false;
+        
+        // Fungsi untuk trigger musik setelah klik pertama
+        function enableMusic() {
+            music.play();
+            document.removeEventListener('click', enableMusic);
+        }
+        document.addEventListener('click', enableMusic);
+
+        function triggerConfetti() {
+            for (let i = 0; i < 20; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.innerText = '✨';
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.animationDelay = Math.random() + 's';
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 2000);
+            }
+        }
 
         function startGame() {
             grid.innerHTML = '';
-            flippedCards = []; matches = 0; moves = 0; gameStarted = true;
-            document.getElementById('moves').innerText = 0;
-            document.getElementById('matches').innerText = "0/8";
+            let fruits = ['🍎', '🍎', '🍌', '🍌', '🍇', '🍇', '🍓', '🍓', '🍍', '🍍', '🍒', '🍒', '🥝', '🥝', '🍉', '🍉'].sort(() => Math.random() - 0.5);
+            let flipped = [], matches = 0, moves = 0;
             document.getElementById('popup').style.display = 'none';
-            
-            // Coba mainkan musik
-            music.play().catch(e => console.log("Menunggu interaksi user untuk musik"));
 
-            cards = [...fruits].sort(() => Math.random() - 0.5);
-
-            cards.forEach((fruit) => {
+            fruits.forEach(f => {
                 const card = document.createElement('div');
-                card.classList.add('card');
+                card.className = 'card';
                 card.innerHTML = '?';
-                card.dataset.fruit = fruit;
                 card.onclick = function() {
-                    if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
+                    if (flipped.length < 2 && !this.classList.contains('flipped')) {
                         this.classList.add('flipped');
-                        this.innerHTML = this.dataset.fruit;
-                        flippedCards.push(this);
-                        
-                        if (flippedCards.length === 2) {
-                            moves++;
-                            document.getElementById('moves').innerText = moves;
-                            if (flippedCards[0].dataset.fruit === flippedCards[1].dataset.fruit) {
-                                sBenar.currentTime = 0; // Reset agar bisa diputar berulang
-                                sBenar.play();
-                                matches++;
-                                document.getElementById('matches').innerText = matches + "/8";
-                                flippedCards = [];
-                                if (matches === 8) document.getElementById('popup').style.display = 'flex';
+                        this.innerHTML = f;
+                        flipped.push(this);
+                        if (flipped.length === 2) {
+                            if (flipped[0].innerHTML === flipped[1].innerHTML) {
+                                matches++; triggerConfetti(); flipped = [];
                             } else {
-                                sSalah.currentTime = 0;
                                 sSalah.play();
-                                setTimeout(() => {
-                                    flippedCards.forEach(c => { c.classList.remove('flipped'); c.innerHTML = '?'; });
-                                    flippedCards = [];
-                                }, 800);
+                                setTimeout(() => { flipped.forEach(c => { c.classList.remove('flipped'); c.innerHTML = '?'; }); flipped = []; }, 800);
                             }
                         }
                     }
@@ -105,7 +102,7 @@
             });
         }
 
-        btnMainLagi.onclick = startGame;
+        document.getElementById('btnMainLagi').onclick = startGame;
         startGame();
     </script>
 </body>
