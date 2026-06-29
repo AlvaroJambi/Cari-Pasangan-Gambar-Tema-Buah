@@ -6,27 +6,55 @@
     <style>
         body { 
             font-family: 'Segoe UI', sans-serif; 
-            background-image: url('Gemini_Generated_Image_u2iegfu2iegfu2ie.png');
+            /* Menggunakan gambar sesuai instruksi */
+            background-image: url('Gemini_Generated_Image_u2iegfu2iegfu2ie_2.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            display: flex; flex-direction: column; align-items: center; padding: 20px; 
-            color: #333; min-height: 100vh; margin: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0;
         }
-        .container { background: rgba(255, 255, 255, 0.85); padding: 20px; border-radius: 30px; text-align: center; }
-        h1 { margin-bottom: 5px; color: #ff4757; text-transform: uppercase; }
+
+        /* Container utama agar konten transparan */
+        .main-wrapper {
+            background: rgba(255, 255, 255, 0.4); 
+            padding: 30px;
+            border-radius: 40px;
+            backdrop-filter: blur(10px); /* Efek blur transparan */
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        h1 { color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-transform: uppercase; }
+
+        /* Kotak Statistik Transparan */
         .stats-container { display: flex; gap: 15px; margin-bottom: 20px; justify-content: center; }
-        .stat-box { border: 3px solid #333; border-radius: 20px; padding: 10px 20px; text-align: center; width: 80px; background: white; }
-        .grid { display: grid; grid-template-columns: repeat(4, 70px); gap: 10px; background: rgba(255, 255, 255, 0.9); padding: 15px; border-radius: 20px; border: 3px solid #333; }
-        .card { width: 70px; height: 70px; background: linear-gradient(135deg, #ff9f43, #ff6b6b); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; color: white; border: 2px solid #fff; }
-        .card.flipped { background: white; color: #333; border: 2px solid #ff9f43; }
+        .stat-box { 
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px solid #fff;
+            border-radius: 20px; padding: 10px 20px; text-align: center; width: 80px; 
+        }
+        .stat-box span { display: block; font-size: 0.7rem; font-weight: bold; color: #333; }
         
-        /* CSS untuk Confetti sederhana */
+        /* Grid Kartu Rata Tengah & Transparan */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 70px); 
+            gap: 10px; 
+            background: rgba(255, 255, 255, 0.4); 
+            padding: 15px; 
+            border-radius: 20px; 
+            justify-content: center;
+            margin: 0 auto;
+        }
+        .card { width: 70px; height: 70px; background: #ff9f43; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; color: white; border: 2px solid #fff; }
+        .card.flipped { background: white; color: #333; }
+        
         .confetti { position: fixed; top: -50px; font-size: 20px; animation: fall 2s linear; }
         @keyframes fall { to { transform: translateY(100vh); } }
 
-        .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-        button { padding: 15px 30px; font-size: 18px; border-radius: 30px; border: none; background: #ff4757; color: white; cursor: pointer; font-weight: bold; margin-top: 20px; }
+        .popup { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        button { padding: 15px 30px; font-size: 18px; border-radius: 30px; border: none; background: #ff4757; color: white; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -34,7 +62,7 @@
     <audio id="music" src="Musik.mp3" loop></audio>
     <audio id="soundSalah" src="Sound Salah.mpeg"></audio>
 
-    <div class="container">
+    <div class="main-wrapper">
         <h1>TEBAK GAMBAR BUAH</h1>
         <div class="stats-container">
             <div class="stat-box"><span>LANGKAH</span><div id="moves">0</div></div>
@@ -45,7 +73,7 @@
     </div>
 
     <div class="popup" id="popup">
-        <h1>🎊 Hebat 🎊</h1>
+        <h1 style="color:white">🎊 Hebat 🎊</h1>
         <button id="btnMainLagi">Main Lagi</button>
     </div>
 
@@ -54,20 +82,14 @@
         const sSalah = document.getElementById('soundSalah');
         const grid = document.getElementById('gameGrid');
         
-        // Fungsi untuk trigger musik setelah klik pertama
-        function enableMusic() {
-            music.play();
-            document.removeEventListener('click', enableMusic);
-        }
-        document.addEventListener('click', enableMusic);
+        // Aktifkan musik saat klik pertama
+        document.addEventListener('click', () => { music.play(); }, {once: true});
 
         function triggerConfetti() {
             for (let i = 0; i < 20; i++) {
                 const c = document.createElement('div');
-                c.className = 'confetti';
-                c.innerText = '✨';
+                c.className = 'confetti'; c.innerText = '✨';
                 c.style.left = Math.random() * 100 + 'vw';
-                c.style.animationDelay = Math.random() + 's';
                 document.body.appendChild(c);
                 setTimeout(() => c.remove(), 2000);
             }
@@ -81,16 +103,16 @@
 
             fruits.forEach(f => {
                 const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = '?';
+                card.className = 'card'; card.innerHTML = '?';
                 card.onclick = function() {
                     if (flipped.length < 2 && !this.classList.contains('flipped')) {
-                        this.classList.add('flipped');
-                        this.innerHTML = f;
-                        flipped.push(this);
+                        this.classList.add('flipped'); card.innerHTML = f; flipped.push(this);
                         if (flipped.length === 2) {
+                            moves++; document.getElementById('moves').innerText = moves;
                             if (flipped[0].innerHTML === flipped[1].innerHTML) {
-                                matches++; triggerConfetti(); flipped = [];
+                                matches++; document.getElementById('matches').innerText = matches + "/8";
+                                triggerConfetti(); flipped = [];
+                                if (matches === 8) document.getElementById('popup').style.display = 'flex';
                             } else {
                                 sSalah.play();
                                 setTimeout(() => { flipped.forEach(c => { c.classList.remove('flipped'); c.innerHTML = '?'; }); flipped = []; }, 800);
